@@ -7,8 +7,7 @@ import java.io.*;
 public class SGFParser {
     public static boolean load(String filename) throws IOException {
         // Clear the board
-        while (Lizzie.board.previousMove())
-            ;
+        Lizzie.board.clear();
 
         File file = new File(filename);
         if (!file.exists() || !file.canRead()) {
@@ -65,12 +64,16 @@ public class SGFParser {
             }
             switch (c) {
             case '(':
-                subTreeDepth += 1;
+                if (!inTag) {
+                    subTreeDepth += 1;
+                }
                 break;
             case ')':
-                subTreeDepth -= 1;
-                if (isMultiGo) {
-                    return true;
+                if (!inTag) {
+                    subTreeDepth -= 1;
+                    if (isMultiGo) {
+                        return true;
+                    }
                 }
                 break;
             case '[':
@@ -123,6 +126,9 @@ public class SGFParser {
                 }
             }
         }
+
+        // Rewind to game start
+        while (Lizzie.board.previousMove());
 
         return true;
     }
